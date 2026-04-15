@@ -1,0 +1,51 @@
+123450b7 // lui   x1, 0x12345       - Lệnh 1: Nạp 20-bit cao vào x1 (x1 = 0x12345000)
+12345117 // auipc x2, 0x12345       - Lệnh 2: Cộng hằng số vào PC
+67808193 // addi  x3, x1, 0x678     - Lệnh 3: Cộng hằng số (I-type)
+0000a213 // slti  x4, x1, 0         - Lệnh 4: So sánh nhỏ hơn 0 (có dấu)
+0000b293 // sltiu x5, x1, 0         - Lệnh 5: So sánh nhỏ hơn 0 (không dấu)
+fff0c313 // xori  x6, x1, -1        - Lệnh 6: Đảo bit (XOR với 0xFFFFFFFF)
+fff0e393 // ori   x7, x1, -1        - Lệnh 7: Phép OR với hằng số
+fff0f413 // andi  x8, x1, -1        - Lệnh 8: Phép AND với hằng số
+00409493 // slli  x9, x1, 4         - Lệnh 9: Dịch trái logic 4 bit
+0040d513 // srli  x10, x1, 4        - Lệnh 10: Dịch phải logic 4 bit (Điền 0)
+4040d593 // srai  x11, x1, 4        - Lệnh 11: Dịch phải số học 4 bit (Giữ dấu)
+00208633 // add   x12, x1, x2       - Lệnh 12: Cộng 2 thanh ghi
+402086b3 // sub   x13, x1, x2       - Lệnh 13: Trừ 2 thanh ghi
+00209733 // sll   x14, x1, x2       - Lệnh 14: Dịch trái theo thanh ghi
+0020a7b3 // slt   x15, x1, x2       - Lệnh 15: So sánh nhỏ hơn (có dấu)
+0020b833 // sltu  x16, x1, x2       - Lệnh 16: So sánh nhỏ hơn (không dấu)
+0020c8b3 // xor   x17, x1, x2       - Lệnh 17: Phép XOR 2 thanh ghi
+0020d933 // srl   x18, x1, x2       - Lệnh 18: Dịch phải logic theo thanh ghi
+4020d9b3 // sra   x19, x1, x2       - Lệnh 19: Dịch phải số học theo thanh ghi
+0020ea33 // or    x20, x1, x2       - Lệnh 20: Phép OR 2 thanh ghi
+0020fab3 // and   x21, x1, x2       - Lệnh 21: Phép AND 2 thanh ghi
+00000f37 // lui   x30, 0x0          - (Chuẩn bị trỏ x30 vào RAM)
+200f0f13 // addi  x30, x30, 0x200   - x30 = 0x200 (Địa chỉ test RAM)
+001f2023 // sw    x1, 0(x30)        - Lệnh 22: Ghi Word (32-bit) xuống RAM
+001f1223 // sh    x1, 4(x30)        - Lệnh 23: Ghi Halfword (16-bit)
+001f0423 // sb    x1, 8(x30)        - Lệnh 24: Ghi Byte (8-bit)
+000f2b03 // lw    x22, 0(x30)       - Lệnh 25: Đọc Word (32-bit)
+004f1b83 // lh    x23, 4(x30)       - Lệnh 26: Đọc Halfword (có mở rộng dấu)
+004f5c03 // lhu   x24, 4(x30)       - Lệnh 27: Đọc Halfword (không mở rộng dấu)
+008f0c83 // lb    x25, 8(x30)       - Lệnh 28: Đọc Byte (có mở rộng dấu)
+008f4d03 // lbu   x26, 8(x30)       - Lệnh 29: Đọc Byte (không mở rộng dấu)
+00108463 // beq   x1, x1, +8        - Lệnh 30: Rẽ nhánh nếu BẰNG (Nhảy qua bẫy)
+00100073 // ebreak                  - BẪY LỖI! (Nếu beq sai, rơi vào đây dừng CPU)
+00101463 // bne   x0, x1, +8        - Lệnh 31: Rẽ nhánh nếu KHÁC
+00100073 // ebreak                  - BẪY LỖI!
+00104463 // blt   x0, x1, +8        - Lệnh 32: Rẽ nhánh nếu NHỎ HƠN (có dấu)
+00100073 // ebreak                  - BẪY LỖI!
+0000d463 // bge   x1, x0, +8        - Lệnh 33: Rẽ nhánh nếu LỚN HƠN HOẶC BẰNG
+00100073 // ebreak                  - BẪY LỖI!
+00106463 // bltu  x0, x1, +8        - Lệnh 34: Rẽ nhánh nếu NHỎ HƠN (không dấu)
+00100073 // ebreak                  - BẪY LỖI!
+0000f463 // bgeu  x1, x0, +8        - Lệnh 35: Rẽ nhánh nếu LỚN HƠN/BẰNG (không dấu)
+00100073 // ebreak                  - BẪY LỖI!
+00800d6f // jal   x27, +8           - Lệnh 36: GỌI HÀM (Nhảy qua bẫy)
+00100073 // ebreak                  - BẪY LỖI!
+00000e17 // auipc x28, 0            - Lấy PC hiện tại làm mốc
+00ce0e67 // jalr  x29, x28, 12      - Lệnh 37: TRẢ VỀ HÀM (Nhảy qua bẫy)
+00100073 // ebreak                  - BẪY LỖI!
+00100513 // addi  x10, x0, 1        - ĐÃ FIXED: Đưa lệnh gán x10=1 lên TRƯỚC ecall !!!
+00000073 // ecall                   - Lệnh 38: Kéo cờ halt_flag dừng mô phỏng
+00100073 // ebreak                  - Lệnh 39: Dừng CPU dự phòng

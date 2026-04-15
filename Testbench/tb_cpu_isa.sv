@@ -1,128 +1,129 @@
 `timescale 1ns/1ps
 
 module tb_cpu_isa;
-    // Khai báo các tín hiệu giao tiếp với CPU
-    logic        clk;
-    logic        rst;
-    logic [7:0]  switches;
-    logic        step_mode;
-    logic        step_trigger;
-    
-    // Các tín hiệu quan sát từ CPU
-    logic [7:0]  leds;
-    logic [31:0] cycle_count;
-    logic [31:0] instr_count;
-    logic [31:0] current_pc;
-    logic        halt_flag;
+  reg clk;
+  reg rst;
+  reg [7:0] switches;
+  wire [7:0] leds;
+  wire [31:0] led_data;
+  wire [31:0] cycle_count;
+  wire [31:0] instr_count;
+  wire [31:0] current_pc;
+  wire halt_flag;
 
-    // Khởi tạo DUT (Device Under Test) - Khối CPU của bạn
-    CPU dut (
-        .clk(clk),
-        .rst(rst),
-        .switches(switches),
-        .step_mode(step_mode),
-        .step_trigger(step_trigger),
-        .leds(leds),
-        .cycle_count(cycle_count),
-        .instr_count(instr_count),
-        .current_pc(current_pc),
-        .halt_flag(halt_flag)
-    );
+  integer errors;
+  integer cycles;
 
-    // =========================================================
-    // 1. TẠO XUNG CLOCK
-    // =========================================================
-    initial begin
-        clk = 0;
-        forever #10 clk = ~clk;
+  CPU dut (
+    .clk(clk),
+    .rst(rst),
+    .switches(switches),
+    .step_mode(1'b0),
+    .step_trigger(1'b0),
+    .leds(leds),
+    .led_data(led_data),
+    .cycle_count(cycle_count),
+    .instr_count(instr_count),
+    .current_pc(current_pc),
+    .halt_flag(halt_flag)
+  );
+
+  initial begin
+    clk = 1'b0;
+    forever #5 clk = ~clk;
+  end
+
+  task automatic check_reg(input integer idx, input [31:0] exp, input string name);
+    begin
+      if (dut.regfile.regs[idx] !== exp) begin
+        $display("[FAIL] %s x%0d expected 0x%08h got 0x%08h",
+                 name, idx, exp, dut.regfile.regs[idx]);
+        errors = errors + 1;
+      end else begin
+        $display("[ OK ] %s x%0d = 0x%08h", name, idx, exp);
+      end
+    end
+  endtask
+
+  task automatic check_mem(input integer addr, input [7:0] exp, input string name);
+    begin
+      if (dut.dmem.mem[addr] !== exp) begin
+        $display("[FAIL] %s mem[0x%0h] expected 0x%02h got 0x%02h",
+                 name, addr, exp, dut.dmem.mem[addr]);
+        errors = errors + 1;
+      end else begin
+        $display("[ OK ] %s mem[0x%0h] = 0x%02h", name, addr, exp);
+      end
+    end
+  endtask
+
+  initial begin
+    errors = 0;
+    cycles = 0;
+    switches = 8'h00;
+
+    $readmemh("Testbench/isa_full.hex", dut.imem.mem);
+
+    rst = 1'b1;
+    repeat (5) @(posedge clk);
+    rst = 1'b0;
+
+    while (!halt_flag && cycles < 300) begin
+      @(posedge clk);
+      cycles = cycles + 1;
     end
 
-    // =========================================================
-    // 2. KHỐI TRACE MONITOR (GIÁM SÁT THỜI GIAN THỰC)
-    // Đã được chuyển ra ngoài đứng độc lập
-    // =========================================================
-    logic [31:0] shadow_regs [0:31];
-    integer i;
-
-    initial begin
-        for(i=0; i<32; i++) shadow_regs[i] = 32'h0;
+    if (!halt_flag) begin
+      $display("[FAIL] CPU did not halt during ISA test");
+      errors = errors + 1;
     end
 
-    // Kiểm tra sau mỗi sườn âm của Clock
-    always @(negedge clk) begin
-        if (!rst) begin
-            // Theo dõi sự thay đổi trong Tập thanh ghi (Register File)
-            for(i=1; i<32; i++) begin // Bỏ qua x0 vì luôn bằng 0
-                if (dut.regfile.regs[i] !== shadow_regs[i]) begin
-                    $display("[%0t] PC = 0x%0h | Lenh ghi vao x%0d -> Thuc te: 0x%0h", 
-                             $time, current_pc, i, dut.regfile.regs[i]);
-                    // Cập nhật lại bản sao
-                    shadow_regs[i] = dut.regfile.regs[i];
-                end
-            end
-            
-            // Theo dõi CPU ghi xuống Bộ nhớ (RAM)
-            if (dut.mem_write) begin
-                $display("[%0t] PC = 0x%0h | Lenh ghi RAM   -> Dia chi: 0x%0h | Thuc te: 0x%0h", 
-                         $time, current_pc, dut.alu_result, dut.rd2);
-            end
-        end
+    check_reg(1,  32'h12345000, "LUI");
+    check_reg(2,  32'h12345004, "AUIPC");
+    check_reg(3,  32'h12345678, "ADDI");
+    check_reg(4,  32'h00000000, "SLTI");
+    check_reg(5,  32'h00000000, "SLTIU");
+    check_reg(6,  32'hedcbafff, "XORI");
+    check_reg(7,  32'hffffffff, "ORI");
+    check_reg(8,  32'h12345000, "ANDI");
+    check_reg(9,  32'h23450000, "SLLI");
+    check_reg(11, 32'h01234500, "SRAI");
+    check_reg(12, 32'h2468a004, "ADD");
+    check_reg(13, 32'hfffffffc, "SUB");
+    check_reg(14, 32'h23450000, "SLL");
+    check_reg(15, 32'h00000001, "SLT");
+    check_reg(16, 32'h00000001, "SLTU");
+    check_reg(17, 32'h00000004, "XOR");
+    check_reg(18, 32'h01234500, "SRL");
+    check_reg(19, 32'h01234500, "SRA");
+    check_reg(20, 32'h12345004, "OR");
+    check_reg(21, 32'h12345000, "AND");
+    check_reg(22, 32'h12345000, "LW");
+    check_reg(23, 32'h00005000, "LH");
+    check_reg(24, 32'h00005000, "LHU");
+    check_reg(25, 32'h00000000, "LB");
+    check_reg(26, 32'h00000000, "LBU");
+    check_reg(31, 32'h000000b0, "JAL link");
+    check_reg(28, 32'h000000b4, "AUIPC before JALR");
+    check_reg(29, 32'h000000bc, "JALR link");
+    check_reg(10, 32'h00000001, "ECALL pass marker");
+    check_reg(30, 32'h00000200, "RAM base");
+
+    check_mem(32'h200, 8'h00, "SW byte0");
+    check_mem(32'h201, 8'h50, "SW byte1");
+    check_mem(32'h202, 8'h34, "SW byte2");
+    check_mem(32'h203, 8'h12, "SW byte3");
+    check_mem(32'h204, 8'h00, "SH byte0");
+    check_mem(32'h205, 8'h50, "SH byte1");
+    check_mem(32'h208, 8'h00, "SB byte0");
+
+    if (errors == 0)
+      $display("TEST_PASS tb_cpu_isa cycles=%0d instr_count=%0d", cycles, instr_count);
+    else begin
+      $display("TEST_FAIL tb_cpu_isa errors=%0d", errors);
+      $fatal(1, "tb_cpu_isa failed");
     end
 
-    // =========================================================
-    // 3. KỊCH BẢN KIỂM THỬ CHÍNH
-    // =========================================================
-    initial begin
-        // Bật ghi sóng Waveform để debug nếu cần
-        $dumpfile("cpu_isa_test.vcd");
-        $dumpvars(0, tb_cpu_isa);
-
-        $display("==================================================");
-        $display("[ISA TEST] KHOI DONG KIEM THU 39 LENH RV32I");
-        $display("==================================================");
-
-        // Khởi tạo trạng thái ban đầu
-        switches = 8'h00;
-        step_mode = 1'b0;      // Chạy chế độ tự động (không step)
-        step_trigger = 1'b0;
-        rst = 1'b1;            // Nhấn giữ Reset
-
-        // Giữ Reset trong 5 chu kỳ clock cho hệ thống ổn định
-        repeat(5) @(posedge clk);
-        rst = 1'b0;            // Thả Reset, CPU bắt đầu chạy
-        $display("[%0t] Da tha Reset, CPU dang chay...\n", $time);
-
-        // Chờ CPU thi hành xong (khi gặp lệnh EBREAK, halt_flag sẽ lên 1)
-        fork
-            wait(halt_flag == 1'b1);
-            begin
-                repeat(2000) @(posedge clk);
-                $error("[%0t] TIMEOUT! CPU bi ket, khong the den duoc lenh EBREAK.", $time);
-                $stop;
-            end
-        join_any
-        disable fork; // Tắt luồng Timeout nếu CPU đã chạy xong bình thường
-
-        $display("\n[%0t] CPU da dung lai tai PC = 0x%0h", $time, current_pc);
-
-        // =========================================================
-        // KIỂM TRA HỘP TRẮNG (WHITE-BOX CHECKING)
-        // =========================================================
-        $display("\n--- TONG KET KET QUA ---");
-        
-        // Theo thiết kế của file Hex, nếu sai nó ghi 0 vào x10, nếu đúng hết nó ghi 1 vào x10
-        if (dut.regfile.regs[10] === 32'h00000001) begin
-            $display("-> TRANG THAI: [ PASS ] - Tuyet voi! CPU cua ban da hoat dong chinh xac ca 39 lenh.");
-        end else if (dut.regfile.regs[10] === 32'h00000000) begin
-            $display("-> TRANG THAI: [ FAIL ] - Phat hien loi logic! CPU da tinh toan hoac re nhanh sai.");
-        end else begin
-            $display("-> TRANG THAI: [ LOI KHONG XAC DINH ] - Gia tri x10 = 0x%0h (Nghi ngo CPU khong ghi duoc vao Register File)", dut.regfile.regs[10]);
-        end
-
-        // In hiệu suất cơ bản
-        $display("Tong so chu ky Clock: %0d", cycle_count);
-        $display("Tong so lenh da chay : %0d", instr_count);
-        $display("==================================================");
-        $finish;
-    end
+    $finish;
+  end
 endmodule

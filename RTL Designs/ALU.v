@@ -2,7 +2,7 @@ module ALU(
     input [31:0] a, b,
     input [3:0] alu_ctrl,
     output reg [31:0] result,
-    output zero, less_than
+    output zero, less_than, less_than_u
 );
     always @(*) begin
         case (alu_ctrl)
@@ -23,4 +23,5 @@ module ALU(
 
     assign zero = (result == 0);
     assign less_than = ($signed(a) < $signed(b));
+    assign less_than_u = (a < b);
 endmodule

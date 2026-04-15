@@ -6,8 +6,8 @@ module InstructionMemory(
 
     initial begin
         // Đọc toàn bộ file Hex vào RAM
-        //$readmemh("risc_aes.hex", mem);
-		  $readmemh("isa_test_39.hex", mem);
+        $readmemh("risc_aes.hex", mem);
+		  //$readmemh("isa_test_39.hex", mem);
     end
 
     // Gửi lệnh ra cho CPU (chia 4 do RISC-V đánh địa chỉ theo Byte)

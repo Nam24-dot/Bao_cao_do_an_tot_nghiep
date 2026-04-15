@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RISC-V AES Accelerator on DE10 Standard</title>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav">
+      <a href="#overview">Tổng quan</a>
+      <a href="#architecture">Kiến trúc</a>
+      <a href="#simulation">Mô phỏng</a>
+      <a href="#fpga">FPGA</a>
+      <a href="https://github.com/Nam24-dot/Bao_cao_do_an_tot_nghiep">GitHub</a>
+    </nav>
+
+    <section class="hero-grid">
+      <div>
+        <p class="eyebrow">Đồ án tốt nghiệp</p>
+        <h1>RISC-V SoC tích hợp bộ tăng tốc mã hóa AES</h1>
+        <p class="lead">
+          Thiết kế vi xử lý RISC-V đơn chu kỳ, ánh xạ AES vào vùng nhớ
+          `0x800000xx`, mô phỏng bằng QuestaSim và triển khai trên FPGA DE10 Standard.
+        </p>
+        <div class="actions">
+          <a class="button primary" href="RTL%20Designs/">Xem RTL</a>
+          <a class="button" href="Testbench/">Xem Testbench</a>
+        </div>
+      </div>
+
+      <figure class="board-shot">
+        <img src="Ket_qua_chay_tren_FPGA_DE10_Standard/1.jpg" alt="Kết quả chạy trên FPGA DE10 Standard">
+        <figcaption>DE10 Standard verification</figcaption>
+      </figure>
+    </section>
+  </header>
+
+  <main>
+    <section id="overview" class="section intro">
+      <p class="eyebrow">Tổng quan</p>
+      <h2>Mục tiêu thiết kế</h2>
+      <p>
+        Hệ thống gồm CPU RISC-V RV32I subset, bộ nhớ lệnh, bộ nhớ dữ liệu,
+        IO LED và lõi AES chuẩn. CPU điều khiển AES bằng lệnh load/store thông qua
+        memory-mapped register, sau đó xuất kết quả ra LED để quan sát trên board.
+      </p>
+      <div class="metric-row">
+        <div><strong>RV32I</strong><span>ALU, load/store, branch, jump, system</span></div>
+        <div><strong>AES</strong><span>Hardware accelerator mapped at 0x800000xx</span></div>
+        <div><strong>DE10</strong><span>Cyclone V, LED/SW debug, clock divider</span></div>
+      </div>
+    </section>
+
+    <section id="architecture" class="section split">
+      <div>
+        <p class="eyebrow">Kiến trúc</p>
+        <h2>CPU giao tiếp AES như một ngoại vi bộ nhớ</h2>
+        <p>
+          `CPU.v` giải mã vùng địa chỉ `0x800000xx` để chọn AES accelerator,
+          đồng thời chặn RAM nội bộ khi truy cập AES hoặc LED IO. Điều này giúp
+          mô phỏng sạch hơn và tránh ghi nhầm vào DataMemory.
+        </p>
+      </div>
+      <div class="flow">
+        <div>InstructionMemory</div>
+        <span>→</span>
+        <div>CPU RV32I</div>
+        <span>→</span>
+        <div>AES Registers</div>
+        <span>→</span>
+        <div>AES Core</div>
+      </div>
+    </section>
+
+    <section id="simulation" class="section">
+      <p class="eyebrow">Mô phỏng</p>
+      <h2>Regression bằng QuestaSim</h2>
+      <p>
+        Bộ test gồm một test ISA cho toàn bộ tập lệnh CPU đang hỗ trợ và một test
+        SoC AES kiểm tra CPU ghi key/block, chờ `ready/valid`, đọc ciphertext và
+        xuất kết quả ra LED register 32-bit.
+      </p>
+      <div class="code-panel">
+        <code>powershell -ExecutionPolicy Bypass -File ".\Simulation Scripts\run_questa_all.ps1"</code>
+        <code>TEST_PASS tb_cpu_isa</code>
+        <code>TEST_PASS tb_cpu_aes</code>
+      </div>
+      <figure class="wide-shot">
+        <img src="Ket_qua_va_Waveform/Ket_qua_cho_39_lenh_cua_CPU.png" alt="Kết quả mô phỏng tập lệnh CPU">
+      </figure>
+    </section>
+
+    <section id="fpga" class="section split reverse">
+      <div>
+        <p class="eyebrow">FPGA</p>
+        <h2>Quan sát 32-bit qua LEDR</h2>
+        <p>
+          Vì DE10 chỉ có 10 LED đỏ, `SW[9:8]` được dùng để chọn byte của thanh ghi
+          LED 32-bit. `LEDR[9:8]` hiển thị bank đang chọn, còn `LEDR[7:0]` hiển thị
+          byte dữ liệu tương ứng.
+        </p>
+      </div>
+      <div class="byte-grid">
+        <div><b>00</b><span>data[7:0]</span></div>
+        <div><b>01</b><span>data[15:8]</span></div>
+        <div><b>10</b><span>data[23:16]</span></div>
+        <div><b>11</b><span>data[31:24]</span></div>
+      </div>
+    </section>
+
+    <section class="section links">
+      <p class="eyebrow">Tài nguyên</p>
+      <h2>File trong repository</h2>
+      <a href="RTL%20Designs/">RTL Designs</a>
+      <a href="Testbench/">Testbench</a>
+      <a href="Simulation%20Scripts/">Simulation Scripts</a>
+      <a href="Quartus%20Project/">Quartus Project</a>
+    </section>
+  </main>
+</body>
+</html>

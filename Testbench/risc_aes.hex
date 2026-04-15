@@ -1,0 +1,33 @@
+800002B7 // mem[0] : lui x5, 0x80000 
+FFFF0537 // mem[1] : lui x10, 0xFFFF0 
+00100313 // mem[2] : addi x6, x0, 1
+0262A423 // mem[3] : sw x6, 0x28(x5) (Config)
+11223337 // mem[4] : lui x6, 0x11223   (KEY)
+34430313 // mem[5] : addi x6, x6, 0x344 
+0462A023 // mem[6] : sw x6, 0x40(x5) -> KEY0
+0462A223 // mem[7] : sw x6, 0x44(x5) -> KEY1
+0462A423 // mem[8] : sw x6, 0x48(x5) -> KEY2
+0462A623 // mem[9] : sw x6, 0x4C(x5) -> KEY3
+00100393 // mem[10]: addi x7, x0, 1
+0272A023 // mem[11]: sw x7, 0x20(x5) (Ra lệnh INIT)
+00000013 // mem[12]: nop
+00000013 // mem[13]: nop
+0242A303 // mem[14]: wait_key: lw x6, 0x24(x5)
+00137313 // mem[15]: andi x6, x6, 1
+FE030CE3 // mem[16]: beq x6, x0, wait_key 
+55667337 // mem[17]: lui x6, 0x55667 (PLAINTEXT)
+78830313 // mem[18]: addi x6, x6, 0x788
+0862A023 // mem[19]: sw x6, 0x80(x5) -> BLOCK0
+0862A223 // mem[20]: sw x6, 0x84(x5) -> BLOCK1
+0862A423 // mem[21]: sw x6, 0x88(x5) -> BLOCK2
+0862A623 // mem[22]: sw x6, 0x8C(x5) -> BLOCK3
+00200393 // mem[23]: addi x7, x0, 2
+0272A023 // mem[24]: sw x7, 0x20(x5) (Ra lệnh NEXT)
+00000013 // mem[25]: nop
+00000013 // mem[26]: nop
+0242A303 // mem[27]: wait_enc: lw x6, 0x24(x5)
+00237313 // mem[28]: andi x6, x6, 2
+FE030CE3 // mem[29]: beq x6, x0, wait_enc
+0C02A403 // mem[30]: lw x8, 0xC0(x5) -> Lấy Ciphertext
+00852023 // mem[31]: sw x8, 0(x10)   -> XUẤT RA ĐÈN LED !!!
+00100073 // mem[32]: ebreak (Dừng CPU)

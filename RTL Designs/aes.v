@@ -1,4 +1,10 @@
-module aes(
+module aes #(
+           parameter USE_ALT_CORE = 1'b1,
+           parameter CUSTOM_MODE = 1'b0,
+           parameter [127 : 0] CUSTOM_IN_MASK  = 128'h4e414d5f435553544f4d5f4145535f31,
+           parameter [127 : 0] CUSTOM_OUT_MASK = 128'h444e544e5f52495343565f4145532121
+          )
+          (
            // Clock and reset.
            input wire           clk,
            input wire           reset_n,
@@ -105,22 +111,51 @@ module aes(
   //----------------------------------------------------------------
   // core instantiation.
   //----------------------------------------------------------------
-  aes_core core(
-                .clk(clk),
-                .reset_n(reset_n),
+  generate
+    if (USE_ALT_CORE)
+      begin : gen_alt_core
+        aes_core_alt #(
+                          .CUSTOM_MODE(CUSTOM_MODE),
+                          .CUSTOM_IN_MASK(CUSTOM_IN_MASK),
+                          .CUSTOM_OUT_MASK(CUSTOM_OUT_MASK)
+                       )
+                     core(
+                          .clk(clk),
+                          .reset_n(reset_n),
 
-                .encdec(core_encdec),
-                .init(core_init),
-                .next(core_next),
-                .ready(core_ready),
+                          .encdec(core_encdec),
+                          .init(core_init),
+                          .next(core_next),
+                          .ready(core_ready),
 
-                .key(core_key),
-                .keylen(core_keylen),
+                          .key(core_key),
+                          .keylen(core_keylen),
 
-                .block(core_block),
-                .result(core_result),
-                .result_valid(core_valid)
-               );
+                          .block(core_block),
+                          .result(core_result),
+                          .result_valid(core_valid)
+                         );
+      end
+    else
+      begin : gen_legacy_core
+        aes_core core(
+                      .clk(clk),
+                      .reset_n(reset_n),
+
+                      .encdec(core_encdec),
+                      .init(core_init),
+                      .next(core_next),
+                      .ready(core_ready),
+
+                      .key(core_key),
+                      .keylen(core_keylen),
+
+                      .block(core_block),
+                      .result(core_result),
+                      .result_valid(core_valid)
+                     );
+      end
+  endgenerate
 
 
   //----------------------------------------------------------------

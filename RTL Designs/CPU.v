@@ -3,6 +3,7 @@ module CPU(
     input [7:0] switches,
     input step_mode, step_trigger,
     output [7:0] leds,
+    output [31:0] led_data,
     output [31:0] cycle_count, instr_count, current_pc,
     output halt_flag
 );
@@ -16,10 +17,10 @@ module CPU(
     wire reg_write, mem_write, mem_read, alu_src, mem_to_reg;
     wire branch, jump, jalr, mem_sign_ext, auipc_sel;
     wire ecall, ebreak, halt;
-    wire zero, less_than, branch_taken;
+    wire zero, less_than, less_than_u, branch_taken;
 
     // --- TÍN HIỆU ĐẶC BIỆT CHO LÕI AES ---
-    wire aes_cs;
+    wire aes_region, aes_cs, io_write, dmem_read, dmem_write;
     wire [31:0] aes_read_data;
     wire [31:0] final_mem_data;
 
@@ -30,11 +31,14 @@ module CPU(
     // Branch logic
     reg branch_condition;
     always @(*) begin
-        case(branch_type)
-            2'b00: branch_condition = zero;          // BEQ
-            2'b01: branch_condition = ~zero;         // BNE
-            2'b10: branch_condition = less_than;     // BLT/BLTU
-            2'b11: branch_condition = ~less_than;    // BGE/BGEU
+        case(instr[14:12])
+            3'b000: branch_condition = zero;          // BEQ
+            3'b001: branch_condition = ~zero;         // BNE
+            3'b100: branch_condition = less_than;     // BLT
+            3'b101: branch_condition = ~less_than;    // BGE
+            3'b110: branch_condition = less_than_u;   // BLTU
+            3'b111: branch_condition = ~less_than_u;  // BGEU
+            default: branch_condition = 1'b0;
         endcase
     end
     assign branch_taken = branch & branch_condition;
@@ -79,11 +83,18 @@ module CPU(
 
     ALU alu(
         .a(alu_a), .b(alu_b), .alu_ctrl(alu_ctrl),
-        .result(alu_result), .zero(zero), .less_than(less_than)
+        .result(alu_result), .zero(zero),
+        .less_than(less_than), .less_than_u(less_than_u)
     );
 
+    assign aes_region = (alu_result[31:8] == 24'h800000);
+    assign aes_cs     = (mem_read || mem_write) && aes_region;
+    assign io_write   = mem_write && (alu_result == 32'hFFFF0000);
+    assign dmem_read  = mem_read && !aes_cs;
+    assign dmem_write = mem_write && !aes_cs && !io_write;
+
     DataMemory dmem(
-        .clk(clk), .we(mem_write), .re(mem_read),
+        .clk(clk), .we(dmem_write), .re(dmem_read),
         .size(mem_size), .sign_ext(mem_sign_ext),
         .addr(alu_result), .wd(rd2), .rd(mem_data)
     );
@@ -92,13 +103,11 @@ module CPU(
     // KHỐI TĂNG TỐC MÃ HÓA AES (HARDWARE ACCELERATOR)
     // =========================================================================
     // Giải mã địa chỉ: Chọn AES khi CPU truy cập dải 0x800000xx
-    assign aes_cs = (alu_result[31:8] == 24'h800000);
-
     aes aes_accelerator (
         .clk(clk),
         .reset_n(~rst),            // rst của CPU tích cực cao, AES tích cực thấp
         .cs(aes_cs),
-        .we(mem_write),
+        .we(mem_write && aes_cs),
         .address(alu_result[9:2]), // Trích xuất địa chỉ thanh ghi (Word-aligned)
         .write_data(rd2),
         .read_data(aes_read_data)
@@ -112,6 +121,7 @@ module CPU(
     
     // Nạp dữ liệu về thanh ghi
     assign write_data = (jump || jalr) ? pc_plus4 : (mem_to_reg ? final_mem_data : alu_result);
+    assign leds = led_data[7:0];
 
     // Tính năng phụ: Đếm chu kỳ và Xuất LED cơ bản (từ tài liệu gốc)
     PerformanceCounter perf_counter(
@@ -125,7 +135,7 @@ module CPU(
         .clk(clk), .rst(rst),
         .switches(switches),
         .cpu_data(rd2),   
-        .write_enable(mem_write && (alu_result == 32'hFFFF0000)),
-        .leds(leds)
+        .write_enable(io_write),
+        .led_data(led_data)
     );
 endmodule

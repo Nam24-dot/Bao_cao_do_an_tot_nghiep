@@ -1,0 +1,22 @@
+# Tool output
+db/
+incremental_db/
+output_files/
+work/
+transcript
+modelsim.ini
+*.wlf
+wlft*
+*.vcd
+*.rpt
+*.summary
+*.log
+*.sof
+*.pof
+*.jdi
+*.sld
+
+# OS/editor noise
+Thumbs.db
+.DS_Store
+.vscode/
