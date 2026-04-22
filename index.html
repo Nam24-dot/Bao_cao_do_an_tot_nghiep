@@ -31,10 +31,18 @@
         </div>
       </div>
 
-      <figure class="board-shot">
-        <img src="Ket_qua_chay_tren_FPGA_DE10_Standard/1.jpg" alt="Kết quả chạy trên FPGA DE10 Standard">
-        <figcaption>DE10 Standard verification</figcaption>
-      </figure>
+      <aside class="status-card">
+        <p class="eyebrow">Trạng thái tư liệu</p>
+        <h2>Kết quả cũ đã được đánh dấu lại</h2>
+        <p>
+          Ảnh FPGA và waveform trong hai thư mục kết quả hiện là tư liệu cũ. Phần mô tả đã cập nhật để tránh nhầm với bản CPU pipeline + Custom AES hiện tại.
+        </p>
+        <div class="code-panel compact">
+          <code>TEST_PASS tb_cpu_isa</code>
+          <code>TEST_PASS tb_cpu_aes</code>
+          <code>f4199f768a3a321a15c74d182bf6d6b5</code>
+        </div>
+      </aside>
     </section>
   </header>
 
@@ -86,7 +94,7 @@
       </div>
       <div class="code-panel">
         <code>python .\Software\Custom_AES_OneFile_GUI.py</code>
-        <code>Tao risc_aes.hex cho CPU</code>
+        <code>Tạo risc_aes.hex cho CPU</code>
         <code>risc_aes.hex → InstructionMemory</code>
       </div>
     </section>
@@ -103,9 +111,10 @@
         <code>TEST_PASS tb_cpu_isa</code>
         <code>TEST_PASS tb_cpu_aes</code>
       </div>
-      <figure class="wide-shot">
-        <img src="Ket_qua_va_Waveform/Ket_qua_cho_39_lenh_cua_CPU.png" alt="Kết quả mô phỏng tập lệnh CPU">
-      </figure>
+      <div class="notice-box">
+        <strong>Lưu ý về thư mục kết quả:</strong>
+        <span>`Ket_qua_va_Waveform/` đang chứa ảnh/waveform cũ. Cần xuất lại waveform bằng script hiện tại trước khi dùng làm minh chứng trong báo cáo.</span>
+      </div>
     </section>
 
     <section id="fpga" class="section split reverse">
@@ -117,6 +126,10 @@
           <code>SW[9:8]</code> chọn <code>RESULT0..RESULT3</code>, <code>SW[7:6]</code> chọn byte trong word,
           và <code>LEDR[7:0]</code> hiển thị byte đang chọn.
         </p>
+        <div class="notice-box">
+          <strong>Lưu ý về ảnh FPGA:</strong>
+          <span>`Ket_qua_chay_tren_FPGA_DE10_Standard/` đang chứa ảnh/video cũ. Cần chụp lại sau khi nạp bản mới lên FPGA.</span>
+        </div>
       </div>
       <div class="byte-grid">
         <div><b>SW9:8 00</b><span>RESULT0</span></div>
@@ -134,6 +147,8 @@
       <a href="Testbench/">Testbench</a>
       <a href="Simulation%20Scripts/">Simulation Scripts</a>
       <a href="Quartus%20Project/">Quartus Project</a>
+      <a href="Ket_qua_chay_tren_FPGA_DE10_Standard/">Kết quả FPGA</a>
+      <a href="Ket_qua_va_Waveform/">Kết quả và waveform</a>
     </section>
   </main>
 </body>

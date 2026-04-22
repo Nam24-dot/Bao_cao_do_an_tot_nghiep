@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --ink: #101418;
   --muted: #5e6873;
   --paper: #f7f4ee;
@@ -90,7 +90,8 @@ h2 {
 }
 
 .lead,
-.section p {
+.section p,
+.status-card p {
   max-width: 760px;
   color: var(--muted);
   font-size: 19px;
@@ -109,7 +110,9 @@ h2 {
 }
 
 .board-shot,
-.wide-shot {
+.wide-shot,
+.status-card,
+.notice-box {
   margin: 0;
   border: 1px solid var(--ink);
   border-radius: 8px;
@@ -130,6 +133,29 @@ h2 {
 figcaption {
   padding: 12px 14px;
   font-family: "Trebuchet MS", Verdana, sans-serif;
+}
+
+.status-card {
+  padding: 24px;
+}
+
+.status-card h2 {
+  font-size: clamp(32px, 4vw, 56px);
+}
+
+.notice-box {
+  display: grid;
+  gap: 8px;
+  margin-top: 28px;
+  padding: 18px;
+  background: var(--yellow);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+
+.notice-box span {
+  color: var(--ink);
+  font-family: "Trebuchet MS", Verdana, sans-serif;
+  line-height: 1.6;
 }
 
 .section {
@@ -209,13 +235,17 @@ figcaption {
   overflow-x: auto;
 }
 
+.code-panel.compact {
+  margin-bottom: 0;
+}
+
 .byte-grid {
   grid-template-columns: repeat(2, 1fr);
 }
 
 .links {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 16px;
   align-items: end;
 }
