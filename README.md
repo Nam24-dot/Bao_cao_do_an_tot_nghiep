@@ -19,7 +19,7 @@ Phiên bản hiện tại có các điểm chính:
 
 ## Trạng thái tư liệu kết quả
 
-Hai thư mục `Ket_qua_chay_tren_FPGA_DE10_Standard/` và `Ket_qua_va_Waveform/` hiện đang chứa ảnh/video/waveform từ bản cũ của đồ án. Các tư liệu này **chưa đại diện cho phiên bản hiện tại** sau khi CPU được chuyển sang pipeline 5 tầng, AES được tùy biến theo phần mềm và LED IO được mở rộng để quan sát đủ 128 bit theo từng word/byte.
+Hai thư mục `Ket_qua_chay_tren_FPGA_DE10_Standard/` và `Ket_qua_va_Waveform/` hiện đang chứa ảnh/video/waveform từ bản cũ của đồ án. Các tư liệu này **chưa đại diện cho phiên bản hiện tại** sau khi CPU pipeline 5 tầng, AES được tùy biến theo phần mềm và LED IO được mở rộng để quan sát đủ 128 bit theo từng word/byte.
 
 Khi chạy lại bản mới, cần cập nhật lại các ảnh/video/waveform trong hai thư mục này theo đúng firmware hiện tại. Kết quả mô phỏng hiện tại đã được xác nhận bằng QuestaSim với:
 
