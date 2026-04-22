@@ -5,12 +5,12 @@ if (-not (Test-Path $questa)) {
   throw "QuestaSim 10.2c vsim.exe not found at $questa"
 }
 
-& $questa -c -do 'do {Simulation Scripts/run_isa.do}; quit -f'
+& $questa -c -do "do {Simulation Scripts/run_isa.do}; quit -f"
 if ($LASTEXITCODE -ne 0) {
   exit $LASTEXITCODE
 }
 
-& $questa -c -do 'do {Simulation Scripts/run_aes.do}; quit -f'
+& $questa -c -do "do {Simulation Scripts/run_aes.do}; quit -f"
 if ($LASTEXITCODE -ne 0) {
   exit $LASTEXITCODE
 }

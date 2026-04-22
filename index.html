@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="vi">
 <head>
   <meta charset="utf-8">
@@ -11,6 +11,7 @@
     <nav class="nav">
       <a href="#overview">Tổng quan</a>
       <a href="#architecture">Kiến trúc</a>
+      <a href="#software">Phần mềm</a>
       <a href="#simulation">Mô phỏng</a>
       <a href="#fpga">FPGA</a>
       <a href="https://github.com/Nam24-dot/Bao_cao_do_an_tot_nghiep">GitHub</a>
@@ -19,14 +20,14 @@
     <section class="hero-grid">
       <div>
         <p class="eyebrow">Đồ án tốt nghiệp</p>
-        <h1>RISC-V SoC tích hợp bộ tăng tốc mã hóa AES</h1>
+        <h1>RISC-V 5-stage pipeline tích hợp bộ tăng tốc Custom AES</h1>
         <p class="lead">
-          Thiết kế vi xử lý RISC-V đơn chu kỳ, ánh xạ AES vào vùng nhớ
-          `0x800000xx`, mô phỏng bằng QuestaSim và triển khai trên FPGA DE10 Standard.
+          Hệ thống SoC nhỏ gồm CPU RV32I pipeline, AES accelerator ánh xạ bộ nhớ,
+          phần mềm tạo firmware từ key/data 128-bit và triển khai kiểm chứng trên FPGA DE10 Standard.
         </p>
         <div class="actions">
           <a class="button primary" href="RTL%20Designs/">Xem RTL</a>
-          <a class="button" href="Testbench/">Xem Testbench</a>
+          <a class="button" href="README.md">Đọc mô tả</a>
         </div>
       </div>
 
@@ -40,27 +41,26 @@
   <main>
     <section id="overview" class="section intro">
       <p class="eyebrow">Tổng quan</p>
-      <h2>Mục tiêu thiết kế</h2>
+      <h2>CPU điều khiển AES như một ngoại vi bộ nhớ</h2>
       <p>
-        Hệ thống gồm CPU RISC-V RV32I subset, bộ nhớ lệnh, bộ nhớ dữ liệu,
-        IO LED và lõi AES chuẩn. CPU điều khiển AES bằng lệnh load/store thông qua
-        memory-mapped register, sau đó xuất kết quả ra LED để quan sát trên board.
+        CPU ghi key và plaintext vào vùng thanh ghi AES tại <code>0x800000xx</code>, phát lệnh init/next,
+        chờ trạng thái ready/valid, đọc ciphertext 128-bit rồi xuất kết quả ra vùng LED IO.
       </p>
       <div class="metric-row">
-        <div><strong>RV32I</strong><span>ALU, load/store, branch, jump, system</span></div>
-        <div><strong>AES</strong><span>Hardware accelerator mapped at 0x800000xx</span></div>
-        <div><strong>DE10</strong><span>Cyclone V, LED/SW debug, clock divider</span></div>
+        <div><strong>RV32I</strong><span>Pipeline 5 tầng, hazard và forwarding</span></div>
+        <div><strong>Custom AES</strong><span>AES-128 với mask, permutation và rotate</span></div>
+        <div><strong>DE10</strong><span>SW chọn word/byte, LEDR hiển thị dữ liệu</span></div>
       </div>
     </section>
 
     <section id="architecture" class="section split">
       <div>
         <p class="eyebrow">Kiến trúc</p>
-        <h2>CPU giao tiếp AES như một ngoại vi bộ nhớ</h2>
+        <h2>Luồng xử lý trong SoC</h2>
         <p>
-          `CPU.v` giải mã vùng địa chỉ `0x800000xx` để chọn AES accelerator,
-          đồng thời chặn RAM nội bộ khi truy cập AES hoặc LED IO. Điều này giúp
-          mô phỏng sạch hơn và tránh ghi nhầm vào DataMemory.
+          <code>CPU.v</code> giải mã truy cập AES và LED IO trong tầng MEM. Các lệnh load/store thông thường đi tới
+          <code>DataMemory</code>, còn truy cập <code>0x800000xx</code> đi tới AES accelerator và truy cập
+          <code>0xffff000x</code> đi tới <code>SimpleIO</code>.
         </p>
       </div>
       <div class="flow">
@@ -70,17 +70,33 @@
         <span>→</span>
         <div>AES Registers</div>
         <span>→</span>
-        <div>AES Core</div>
+        <div>LED IO</div>
+      </div>
+    </section>
+
+    <section id="software" class="section split reverse">
+      <div>
+        <p class="eyebrow">Phần mềm</p>
+        <h2>Nhập key/data và tạo firmware cho CPU</h2>
+        <p>
+          GUI trong <code>Software/Custom_AES_OneFile_GUI.py</code> nhận key và input block 128-bit,
+          tính kết quả Custom AES, rồi sinh <code>risc_aes.hex</code> gồm các lệnh RISC-V để CPU nạp key,
+          nạp block, chạy AES và ghi đủ <code>RESULT0..RESULT3</code> ra LED registers.
+        </p>
+      </div>
+      <div class="code-panel">
+        <code>python .\Software\Custom_AES_OneFile_GUI.py</code>
+        <code>Tao risc_aes.hex cho CPU</code>
+        <code>risc_aes.hex → InstructionMemory</code>
       </div>
     </section>
 
     <section id="simulation" class="section">
       <p class="eyebrow">Mô phỏng</p>
-      <h2>Regression bằng QuestaSim</h2>
+      <h2>Regression bằng QuestaSim 10.2c</h2>
       <p>
-        Bộ test gồm một test ISA cho toàn bộ tập lệnh CPU đang hỗ trợ và một test
-        SoC AES kiểm tra CPU ghi key/block, chờ `ready/valid`, đọc ciphertext và
-        xuất kết quả ra LED register 32-bit.
+        Bộ test gồm test ISA cho tập lệnh CPU đang hỗ trợ và test CPU-AES kiểm tra toàn bộ đường đi
+        từ firmware, CPU pipeline, AES accelerator tới LED IO.
       </p>
       <div class="code-panel">
         <code>powershell -ExecutionPolicy Bypass -File ".\Simulation Scripts\run_questa_all.ps1"</code>
@@ -95,25 +111,26 @@
     <section id="fpga" class="section split reverse">
       <div>
         <p class="eyebrow">FPGA</p>
-        <h2>Quan sát 32-bit qua LEDR</h2>
+        <h2>Xem đủ ciphertext 128-bit bằng switch</h2>
         <p>
-          Vì DE10 chỉ có 10 LED đỏ, `SW[9:8]` được dùng để chọn byte của thanh ghi
-          LED 32-bit. `LEDR[9:8]` hiển thị bank đang chọn, còn `LEDR[7:0]` hiển thị
-          byte dữ liệu tương ứng.
+          DE10 Standard chỉ có 10 LED đỏ, nên kết quả AES được xem theo từng byte.
+          <code>SW[9:8]</code> chọn <code>RESULT0..RESULT3</code>, <code>SW[7:6]</code> chọn byte trong word,
+          và <code>LEDR[7:0]</code> hiển thị byte đang chọn.
         </p>
       </div>
       <div class="byte-grid">
-        <div><b>00</b><span>data[7:0]</span></div>
-        <div><b>01</b><span>data[15:8]</span></div>
-        <div><b>10</b><span>data[23:16]</span></div>
-        <div><b>11</b><span>data[31:24]</span></div>
+        <div><b>SW9:8 00</b><span>RESULT0</span></div>
+        <div><b>SW9:8 01</b><span>RESULT1</span></div>
+        <div><b>SW9:8 10</b><span>RESULT2</span></div>
+        <div><b>SW9:8 11</b><span>RESULT3</span></div>
       </div>
     </section>
 
     <section class="section links">
       <p class="eyebrow">Tài nguyên</p>
-      <h2>File trong repository</h2>
+      <h2>Thư mục chính</h2>
       <a href="RTL%20Designs/">RTL Designs</a>
+      <a href="Software/">Software</a>
       <a href="Testbench/">Testbench</a>
       <a href="Simulation%20Scripts/">Simulation Scripts</a>
       <a href="Quartus%20Project/">Quartus Project</a>

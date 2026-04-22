@@ -15,7 +15,7 @@ module tb_cpu_aes;
   integer cycles;
   reg [127:0] aes_result;
 
-  localparam [127:0] EXPECTED_AES = 128'h8a28971b7b5a211d2f05bd1637759409;
+  localparam [127:0] EXPECTED_AES = 128'hf4199f768a3a321a15c74d182bf6d6b5;
 
   CPU dut (
     .clk(clk),
@@ -87,15 +87,27 @@ module tb_cpu_aes;
       $display("[ OK ] AES valid_reg = 1");
     end
 
+    switches = 8'h00;
+    #1;
+    check32(led_data, EXPECTED_AES[127:96], "LED RESULT0 register");
     if (leds !== EXPECTED_AES[103:96]) begin
-      $display("[FAIL] LED expected low byte of loaded RESULT0 0x%02h got 0x%02h",
-               EXPECTED_AES[103:96], leds);
+      $display("[FAIL] LED byte RESULT0 expected 0x%02h got 0x%02h", EXPECTED_AES[103:96], leds);
       errors = errors + 1;
     end else begin
-      $display("[ OK ] LED output = 0x%02h", leds);
+      $display("[ OK ] LED byte RESULT0 = 0x%02h", leds);
     end
 
-    check32(led_data, EXPECTED_AES[127:96], "32-bit LED register");
+    switches = 8'h01;
+    #1;
+    check32(led_data, EXPECTED_AES[95:64], "LED RESULT1 register");
+
+    switches = 8'h02;
+    #1;
+    check32(led_data, EXPECTED_AES[63:32], "LED RESULT2 register");
+
+    switches = 8'h03;
+    #1;
+    check32(led_data, EXPECTED_AES[31:0], "LED RESULT3 register");
 
     if (errors == 0)
       $display("TEST_PASS tb_cpu_aes cycles=%0d instr_count=%0d result=0x%032h",

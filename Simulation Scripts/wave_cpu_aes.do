@@ -33,18 +33,30 @@ add wave -radix binary /tb_cpu_aes/clk
 add wave -radix binary /tb_cpu_aes/rst
 add wave -radix unsigned /tb_cpu_aes/cycles
 add wave -radix unsigned /tb_cpu_aes/errors
+add wave -radix hex /tb_cpu_aes/switches
 add wave -radix hex /tb_cpu_aes/leds
+add wave -radix hex /tb_cpu_aes/led_data
+add wave -radix hex /tb_cpu_aes/aes_result
 
-add wave -divider "CPU Bus"
+add wave -divider "CPU Pipeline"
 add wave -radix hex /tb_cpu_aes/dut/pc
-add wave -radix hex /tb_cpu_aes/dut/instr
-add wave -radix hex /tb_cpu_aes/dut/alu_result
-add wave -radix hex /tb_cpu_aes/dut/rd2
-add wave -radix hex /tb_cpu_aes/dut/write_data
-add wave -radix binary /tb_cpu_aes/dut/mem_read
-add wave -radix binary /tb_cpu_aes/dut/mem_write
-add wave -radix binary /tb_cpu_aes/dut/aes_cs
-add wave -radix binary /tb_cpu_aes/dut/io_write
+add wave -radix hex /tb_cpu_aes/dut/if_instr
+add wave -radix hex /tb_cpu_aes/dut/if_id_instr
+add wave -radix hex /tb_cpu_aes/dut/id_ex_pc
+add wave -radix hex /tb_cpu_aes/dut/ex_alu_result
+add wave -radix hex /tb_cpu_aes/dut/ex_mem_alu_result
+add wave -radix hex /tb_cpu_aes/dut/ex_mem_store_data
+add wave -radix hex /tb_cpu_aes/dut/mem_wb_mem_data
+add wave -radix hex /tb_cpu_aes/dut/wb_write_data
+add wave -radix binary /tb_cpu_aes/dut/load_use_stall
+add wave -radix binary /tb_cpu_aes/dut/ex_flush
+add wave -radix binary /tb_cpu_aes/dut/halted
+
+add wave -divider "Memory Mapped IO"
+add wave -radix binary /tb_cpu_aes/dut/mem_aes_cs
+add wave -radix binary /tb_cpu_aes/dut/mem_io_write
+add wave -radix hex /tb_cpu_aes/dut/aes_read_data
+add wave -radix hex /tb_cpu_aes/dut/io_module/led_regs
 
 add wave -divider "AES Register Interface"
 add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/cs
@@ -55,17 +67,6 @@ add wave -radix hex /tb_cpu_aes/dut/aes_accelerator/read_data
 add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/ready_reg
 add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/valid_reg
 add wave -radix hex /tb_cpu_aes/dut/aes_accelerator/result_reg
-
-add wave -divider "AES Core"
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/ready
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/result_valid
-add wave -radix hex /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/state_reg
-add wave -radix hex /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/cmd_reg
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/legacy_init
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/legacy_next
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/legacy_ready
-add wave -radix binary /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/legacy_valid
-add wave -radix hex /tb_cpu_aes/dut/aes_accelerator/gen_alt_core/core/result_reg
 
 run 2500 ns
 wave zoom full

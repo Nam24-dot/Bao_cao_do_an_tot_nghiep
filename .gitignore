@@ -20,3 +20,7 @@ wlft*
 Thumbs.db
 .DS_Store
 .vscode/
+
+# Python
+__pycache__/
+*.pyc

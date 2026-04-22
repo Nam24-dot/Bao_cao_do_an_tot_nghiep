@@ -1,33 +1,51 @@
-800002B7 // mem[0] : lui x5, 0x80000 
-FFFF0537 // mem[1] : lui x10, 0xFFFF0 
-00100313 // mem[2] : addi x6, x0, 1
-0262A423 // mem[3] : sw x6, 0x28(x5) (Config)
-11223337 // mem[4] : lui x6, 0x11223   (KEY)
-34430313 // mem[5] : addi x6, x6, 0x344 
-0462A023 // mem[6] : sw x6, 0x40(x5) -> KEY0
-0462A223 // mem[7] : sw x6, 0x44(x5) -> KEY1
-0462A423 // mem[8] : sw x6, 0x48(x5) -> KEY2
-0462A623 // mem[9] : sw x6, 0x4C(x5) -> KEY3
-00100393 // mem[10]: addi x7, x0, 1
-0272A023 // mem[11]: sw x7, 0x20(x5) (Ra lệnh INIT)
-00000013 // mem[12]: nop
-00000013 // mem[13]: nop
-0242A303 // mem[14]: wait_key: lw x6, 0x24(x5)
-00137313 // mem[15]: andi x6, x6, 1
-FE030CE3 // mem[16]: beq x6, x0, wait_key 
-55667337 // mem[17]: lui x6, 0x55667 (PLAINTEXT)
-78830313 // mem[18]: addi x6, x6, 0x788
-0862A023 // mem[19]: sw x6, 0x80(x5) -> BLOCK0
-0862A223 // mem[20]: sw x6, 0x84(x5) -> BLOCK1
-0862A423 // mem[21]: sw x6, 0x88(x5) -> BLOCK2
-0862A623 // mem[22]: sw x6, 0x8C(x5) -> BLOCK3
-00200393 // mem[23]: addi x7, x0, 2
-0272A023 // mem[24]: sw x7, 0x20(x5) (Ra lệnh NEXT)
-00000013 // mem[25]: nop
-00000013 // mem[26]: nop
-0242A303 // mem[27]: wait_enc: lw x6, 0x24(x5)
-00237313 // mem[28]: andi x6, x6, 2
-FE030CE3 // mem[29]: beq x6, x0, wait_enc
-0C02A403 // mem[30]: lw x8, 0xC0(x5) -> Lấy Ciphertext
-00852023 // mem[31]: sw x8, 0(x10)   -> XUẤT RA ĐÈN LED !!!
-00100073 // mem[32]: ebreak (Dừng CPU)
+800002B7 // mem[0]: lui x5, 0x80000 (AES base)
+FFFF0537 // mem[1]: lui x10, 0xffff0 (LED base)
+00100313 // mem[2]: addi x6, x0, 1
+0262A423 // mem[3]: sw x6, 0x28(x5) (AES config encrypt)
+01234337 // mem[4]: lui x6, 0x01234 (KEY0)
+56730313 // mem[5]: addi x6, x6, 0x567 -> 0x01234567
+0462A023 // mem[6]: sw x6, 0x40(x5) -> KEY0
+89ABD337 // mem[7]: lui x6, 0x89ABD (KEY1)
+DEF30313 // mem[8]: addi x6, x6, 0xDEF -> 0x89ABCDEF
+0462A223 // mem[9]: sw x6, 0x44(x5) -> KEY1
+FEDCC337 // mem[10]: lui x6, 0xFEDCC (KEY2)
+A9830313 // mem[11]: addi x6, x6, 0xA98 -> 0xFEDCBA98
+0462A423 // mem[12]: sw x6, 0x48(x5) -> KEY2
+76543337 // mem[13]: lui x6, 0x76543 (KEY3)
+21030313 // mem[14]: addi x6, x6, 0x210 -> 0x76543210
+0462A623 // mem[15]: sw x6, 0x4C(x5) -> KEY3
+00100393 // mem[16]: addi x7, x0, 1
+0272A023 // mem[17]: sw x7, 0x20(x5) (AES INIT)
+00000013 // mem[18]: nop
+00000013 // mem[19]: nop
+0242A303 // mem[20]: wait_key: lw x6, 0x24(x5)
+00137313 // mem[21]: andi x6, x6, 1
+FE030CE3 // mem[22]: beq x6, x0, wait_key
+22334337 // mem[23]: lui x6, 0x22334 (BLOCK0)
+45530313 // mem[24]: addi x6, x6, 0x455 -> 0x22334455
+0862A023 // mem[25]: sw x6, 0x80(x5) -> BLOCK0
+66779337 // mem[26]: lui x6, 0x66779 (BLOCK1)
+89930313 // mem[27]: addi x6, x6, 0x899 -> 0x66778899
+0862A223 // mem[28]: sw x6, 0x84(x5) -> BLOCK1
+11004337 // mem[29]: lui x6, 0x11004 (BLOCK2)
+45530313 // mem[30]: addi x6, x6, 0x455 -> 0x11004455
+0862A423 // mem[31]: sw x6, 0x88(x5) -> BLOCK2
+6688A337 // mem[32]: lui x6, 0x6688A (BLOCK3)
+91130313 // mem[33]: addi x6, x6, 0x911 -> 0x66889911
+0862A623 // mem[34]: sw x6, 0x8C(x5) -> BLOCK3
+00200393 // mem[35]: addi x7, x0, 2
+0272A023 // mem[36]: sw x7, 0x20(x5) (AES NEXT)
+00000013 // mem[37]: nop
+00000013 // mem[38]: nop
+0242A303 // mem[39]: wait_enc: lw x6, 0x24(x5)
+00237313 // mem[40]: andi x6, x6, 2
+FE030CE3 // mem[41]: beq x6, x0, wait_enc
+0C02A403 // mem[42]: lw x8, 0xC0(x5) -> RESULT0
+00852023 // mem[43]: sw x8, 0(x10) -> LED_RESULT0
+0C42A403 // mem[44]: lw x8, 0xC4(x5) -> RESULT1
+00852223 // mem[45]: sw x8, 4(x10) -> LED_RESULT1
+0C82A403 // mem[46]: lw x8, 0xC8(x5) -> RESULT2
+00852423 // mem[47]: sw x8, 8(x10) -> LED_RESULT2
+0CC2A403 // mem[48]: lw x8, 0xCC(x5) -> RESULT3
+00852623 // mem[49]: sw x8, 12(x10) -> LED_RESULT3
+00100073 // mem[50]: ebreak

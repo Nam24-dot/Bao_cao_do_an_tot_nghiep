@@ -5,4 +5,4 @@ if (-not (Test-Path $questa)) {
   throw "QuestaSim 10.2c vsim.exe not found at $questa"
 }
 
-& $questa -do 'do {Simulation Scripts/wave_cpu_isa.do}'
+& $questa -do "do {Simulation Scripts/wave_cpu_isa.do}"

@@ -1,8 +1,10 @@
 module aes #(
            parameter USE_ALT_CORE = 1'b1,
            parameter CUSTOM_MODE = 1'b0,
-           parameter [127 : 0] CUSTOM_IN_MASK  = 128'h4e414d5f435553544f4d5f4145535f31,
-           parameter [127 : 0] CUSTOM_OUT_MASK = 128'h444e544e5f52495343565f4145532121
+           parameter [127 : 0] CUSTOM_IN_MASK  = 128'h13579BDF2468ACE013579BDF2468ACE0,
+           parameter [127 : 0] CUSTOM_OUT_MASK = 128'h0F1E2D3C4B5A69788796A5B4C3D2E1F0,
+           parameter [255 : 0] CUSTOM_KEY_MASK = 256'hA55AA55A3CC33CC35AA55AA53CC33CC300000000000000000000000000000000,
+           parameter [3 : 0]   CUSTOM_ROT_BYTES = 4'd3
           )
           (
            // Clock and reset.
@@ -117,7 +119,9 @@ module aes #(
         aes_core_alt #(
                           .CUSTOM_MODE(CUSTOM_MODE),
                           .CUSTOM_IN_MASK(CUSTOM_IN_MASK),
-                          .CUSTOM_OUT_MASK(CUSTOM_OUT_MASK)
+                          .CUSTOM_OUT_MASK(CUSTOM_OUT_MASK),
+                          .CUSTOM_KEY_MASK(CUSTOM_KEY_MASK),
+                          .CUSTOM_ROT_BYTES(CUSTOM_ROT_BYTES)
                        )
                      core(
                           .clk(clk),

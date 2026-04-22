@@ -33,28 +33,24 @@ add wave -radix binary /tb_cpu_isa/clk
 add wave -radix binary /tb_cpu_isa/rst
 add wave -radix unsigned /tb_cpu_isa/cycles
 add wave -radix unsigned /tb_cpu_isa/errors
+add wave -radix hex /tb_cpu_isa/led_data
 
-add wave -divider "CPU Control"
+add wave -divider "CPU Pipeline"
 add wave -radix hex /tb_cpu_isa/dut/pc
-add wave -radix hex /tb_cpu_isa/dut/instr
-add wave -radix binary /tb_cpu_isa/dut/reg_write
-add wave -radix binary /tb_cpu_isa/dut/mem_read
-add wave -radix binary /tb_cpu_isa/dut/mem_write
-add wave -radix binary /tb_cpu_isa/dut/branch
-add wave -radix binary /tb_cpu_isa/dut/branch_taken
-add wave -radix binary /tb_cpu_isa/dut/jump
-add wave -radix binary /tb_cpu_isa/dut/jalr
-add wave -radix binary /tb_cpu_isa/dut/halt
-
-add wave -divider "ALU And Memory"
-add wave -radix hex /tb_cpu_isa/dut/rd1
-add wave -radix hex /tb_cpu_isa/dut/rd2
-add wave -radix hex /tb_cpu_isa/dut/imm
-add wave -radix hex /tb_cpu_isa/dut/alu_result
-add wave -radix hex /tb_cpu_isa/dut/write_data
-add wave -radix hex /tb_cpu_isa/dut/mem_data
-add wave -radix binary /tb_cpu_isa/dut/dmem_read
-add wave -radix binary /tb_cpu_isa/dut/dmem_write
+add wave -radix hex /tb_cpu_isa/dut/if_instr
+add wave -radix hex /tb_cpu_isa/dut/if_id_instr
+add wave -radix hex /tb_cpu_isa/dut/id_opcode
+add wave -radix hex /tb_cpu_isa/dut/id_rs1
+add wave -radix hex /tb_cpu_isa/dut/id_rs2
+add wave -radix hex /tb_cpu_isa/dut/id_rd
+add wave -radix hex /tb_cpu_isa/dut/id_imm
+add wave -radix hex /tb_cpu_isa/dut/ex_alu_result
+add wave -radix hex /tb_cpu_isa/dut/ex_mem_alu_result
+add wave -radix hex /tb_cpu_isa/dut/mem_final_data
+add wave -radix hex /tb_cpu_isa/dut/wb_write_data
+add wave -radix binary /tb_cpu_isa/dut/load_use_stall
+add wave -radix binary /tb_cpu_isa/dut/ex_flush
+add wave -radix binary /tb_cpu_isa/dut/halted
 
 add wave -divider "Register File"
 add wave -radix hex /tb_cpu_isa/dut/regfile/regs
