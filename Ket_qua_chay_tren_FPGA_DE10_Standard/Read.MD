@@ -4,7 +4,7 @@ Thư mục này đang chứa ảnh/video từ bản kiểm tra cũ của đồ �
 
 Các tư liệu hiện có chưa đại diện cho phiên bản hiện tại sau các thay đổi sau:
 
-- CPU đã chuyển sang pipeline 5 tầng.
+- CPU pipeline 5 tầng.
 - AES đã chạy ở chế độ Custom AES khớp với phần mềm Python.
 - Firmware `risc_aes.hex` được tạo tự động từ key và input block.
 - LED IO đã được mở rộng để lưu đủ `RESULT0..RESULT3` và quan sát đủ 128 bit theo từng word/byte.
