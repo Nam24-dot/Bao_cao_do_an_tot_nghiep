@@ -1,4 +1,4 @@
-﻿# RISC-V 5 state pipelined với mã hóa AES đã triển khai thành công trên FPGA
+﻿# RISC-V 5-state pipelined với mã hóa AES đã triển khai thành công trên FPGA
 
 Repository này lưu trữ mã nguồn, testbench, script mô phỏng, cấu hình Quartus và trang báo cáo cho đề tài:
 
